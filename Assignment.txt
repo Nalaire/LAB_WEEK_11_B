@@ -1,0 +1,19 @@
+1. takePictureLauncher =
+            registerForActivityResult(ActivityResultContracts.TakePicture()) {
+                providerFileManager.insertImageToStore(photoInfo)
+            }
+
+2. 
+The URI refers to the content URI provided by the Android MediaStore. It acts as a persistent reference to the file in the Android database (e.g., content://media/external/images/media/105), allowing your app to access the file content securely without needing direct file system permissions.
+
+relativePath refers to the directory path relative to a standard storage directory (like DCIM, Pictures, or Movies) where the file is stored. For example, if you want your picture to be saved in a specific folder for your app, this string might be Pictures/MyLabApp/. This tells Android exactly which folder inside the public storage the file belongs in.
+
+3.
+
+1) User taps the button to take a picture.
+2) Inside the click listener, the app creates a FileInfo object before the camera even opens.
+3) The app launches the camera using the takePictureLauncher (which wraps ActivityResultContracts.TakePicture)
+4) The user sees the camera UI, takes the photo, and confirms it. The camera app writes the image data directly to the URI location provided in step 3. The camera activity finishes and returns a result (Success/Failure) to your app.
+5) In MainActivity, the registerForActivityResult callback triggers.
+6) Inside insertImageToStore, The app prepares ContentValues containing the display name, MIME type, and the relativePath (from FileInfo object). It calls resolver.insert(...) to create a new entry in the Android MediaStore. This creates a blank entry in the public gallery. The app opens an OutputStream to this new MediaStore entry and an InputStream from the temporary file (created in step 2). It copies the bytes from the temp file into the MediaStore stream.
+7) Once the copy is complete, the image is now permanent in the user's gallery. The app usually deletes the temporary file from the cache to save space.
